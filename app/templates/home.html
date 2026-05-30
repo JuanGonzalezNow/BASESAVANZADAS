@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIDEAXIS - Inicio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{{ url_for('static', filename='image/favicon.png') }}" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Barlow', sans-serif; }
+        .brand { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.12em; }
+
+        /* Active nav link */
+        .nav-link { position: relative; }
+        .nav-link::after { content:''; position:absolute; left:0; bottom:-2px; width:0; height:2px; background:#dc2626; transition:width 0.25s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width:100%; }
+
+        /* Badge pulse */
+        @keyframes pulse-badge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+        .badge-pulse { animation: pulse-badge 2s infinite; }
+
+        /* Scrollbar minimal */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 999px; }
+
+        /* ─── ESTILOS DEL MODAL ─── */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.65); 
+            backdrop-filter: blur(4px); z-index: 100; 
+            display: none; 
+            align-items: center; justify-content: center; padding: 16px; 
+        }
+        .modal-overlay.open { display: flex; }
+
+        .auth-card { 
+            background: #fff; border-radius: 24px; width: 100%; max-width: 820px; 
+            display: grid; grid-template-columns: 1fr 1fr; 
+            box-shadow: 0 24px 80px rgba(0,0,0,0.22); position: relative; 
+            overflow: hidden; /* Para que las esquinas no se salgan */
+        }
+        
+        @media (max-width: 640px) { 
+            .auth-card { grid-template-columns: 1fr; } 
+            .auth-side { display: none; } 
+        }
+
+        .auth-left { display: flex; flex-direction: column; padding: 40px; }
+        .auth-input { 
+            width: 100%; background: #f9fafb; border: 1.5px solid #e5e7eb; 
+            border-radius: 12px; padding: 11px 14px 11px 38px; font-weight: 700; font-size: 13px;
+            font-family: 'Barlow', sans-serif;
+        }
+        .auth-input:focus { outline:none; border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,0.09); }
+        
+        .auth-btn { 
+            width: 100%; background: #dc2626; color: #fff; border-radius: 14px; 
+            padding: 13px; font-weight: 900; font-size: 11px; text-transform: uppercase; 
+            cursor: pointer; transition: background 0.2s;
+        }
+        .auth-btn:hover { background:#b91c1c; }
+        
+        .auth-side { 
+            background-image: url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=900');
+            background-size: cover; background-position: center;
+            position: relative;
+        }
+        .auth-side::before {
+            content:''; position:absolute; inset:0;
+            background: linear-gradient(135deg, rgba(220,38,38,0.72) 0%, rgba(0,0,0,0.78) 100%);
+        }
+        .auth-side-content { position:relative; z-index:1; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <nav class="bg-white shadow-sm py-0 px-8 sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-screen-xl mx-auto flex items-center justify-between h-16">
+            <a href="{{ url_for('main.home') }}" class="brand text-3xl text-red-600 tracking-[.12em]">RIDEAXIS</a>
+            <div class="hidden md:flex items-center space-x-8 text-[11px] font-bold uppercase tracking-widest text-gray-600">
+                <a href="{{ url_for('main.home') }}" class="nav-link active text-gray-900">Inicio</a>
+                <a href="{{ url_for('motos.catalogo') }}" class="nav-link">Motos</a>
+                <a href="{{ url_for('main.about') }}" class="nav-link">Sobre Nosotros</a>                
+            </div>
+            <div class="flex items-center space-x-5 text-gray-600">
+                <button onclick="toggleLoginModal()" class="hover:text-red-600 transition-colors" title="Cuenta">
+                    <i class="fas fa-user text-sm"></i>
+                </button>
+                <button class="relative hover:text-red-600 transition-colors" title="Carrito">
+                    <i class="fas fa-shopping-cart text-sm"></i>
+                    <span class="badge-pulse absolute -top-2 -right-2 bg-red-600 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
+                </button>
+                <button class="md:hidden hover:text-red-600 transition-colors">
+                    <i class="fas fa-bars text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="relative w-full h-[80vh] bg-black flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=2000" alt="Moto Hero" class="w-full h-full object-cover opacity-50">
+        </div>
+        
+        <div class="relative z-10 text-center px-6">
+            <p class="text-[12px] text-red-500 font-black uppercase tracking-[0.3em] mb-4">Potencia y Control</p>
+            <h1 class="brand text-6xl md:text-8xl text-white mb-6">RIDEAXIS</h1>
+            <p class="text-gray-300 text-sm md:text-base font-semibold max-w-xl mx-auto mb-8">Descubre nuestra nueva línea de motocicletas deportivas </p>
+            <a href="{{ url_for('motos.catalogo') }}" class="inline-block bg-red-600 text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-colors duration-300 shadow-lg">
+                Ver Catálogo
+            </a>
+        </div>
+    </div>
+
+    <div class="max-w-screen-xl mx-auto px-6 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
+                <i class="fas fa-motorcycle text-3xl text-red-600 mb-4"></i>
+                <h3 class="brand text-2xl text-gray-900 mb-2">MODELOS</h3>
+                <p class="text-xs text-gray-500 font-medium">Contamos con las mejores marcas y los últimos lanzamientos del mercado.</p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
+                <i class="fas fa-shield-alt text-3xl text-red-600 mb-4"></i>
+                <h3 class="brand text-2xl text-gray-900 mb-2">GARANTÍA TOTAL</h3>
+                <p class="text-xs text-gray-500 font-medium">Todas nuestras motos incluyen respaldo directo del concesionario y taller autorizado.</p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
+                <i class="fas fa-map-marker-alt text-3xl text-red-600 mb-4"></i>
+                <h3 class="brand text-2xl text-gray-900 mb-2">RETIRO LOCAL</h3>
+                <p class="text-xs text-gray-500 font-medium">Compra en línea y retira tu motocicleta en nuestro concesionario sin costo adicional.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal-overlay">
+        <div class="auth-card">
+            
+            <div class="auth-left relative overflow-y-auto max-h-[90vh]">
+                <p class="brand text-3xl text-red-600 mb-5">RIDEAXIS</p>
+
+                <div id="panelLogin">
+                    <form class="space-y-4">
+                        # Login de usuarios
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Correo Electrónico</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="auth-input" placeholder="correo@ejemplo.com" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Contraseña</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="auth-input" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="auth-btn">Ingresar</button>
+                        
+                        <p class="text-center text-xs text-gray-500 font-medium mt-4">
+                            ¿No tienes cuenta? 
+                            <button type="button" onclick="switchTab('register')" class="text-red-600 font-bold hover:underline">Regístrate</button>
+                        </p>
+                    </form>
+                </div>
+
+                <div id="panelRegister" class="hidden">
+                    <form class="space-y-4">
+                        # Registro de usuarios
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nombre Completo</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
+                                <input type="text" class="auth-input" placeholder="Nombre" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Apellido Completo</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
+                                <input type="text" class="auth-input" placeholder="Apellido" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Telefono</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
+                                <input type="text" class="auth-input" placeholder="3214567898" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Tipo de Documento</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
+                                <input type="text" class="auth-input" placeholder="" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Numero de Documento</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
+                                <input type="text" class="auth-input" placeholder="Digita El Numero De Documento" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Correo Electrónico</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="auth-input" placeholder="correo@ejemplo.com" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Contraseña</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="auth-input" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="auth-btn">Crear Cuenta</button>
+                        
+                        <p class="text-center text-xs text-gray-500 font-medium mt-4">
+                            ¿Ya tienes cuenta? 
+                            <button type="button" onclick="switchTab('login')" class="text-red-600 font-bold hover:underline">Inicia Sesión</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <div class="auth-side">
+                <div class="auth-side-content flex flex-col justify-end p-10 h-full">
+                    <p id="sideSubtitle" class="text-[10px] text-red-300 font-black uppercase tracking-[.25em] mb-2">Bienvenido</p>
+                    <h2 id="sideTitle" class="brand text-5xl text-white leading-none mb-3">ACCEDE<br>A TU CUENTA</h2>
+                    <p id="sideDesc" class="text-gray-300 text-xs font-semibold max-w-[220px]">Gestiona tus pedidos y preferencias.</p>
+                </div>
+            </div>
+
+            <button onclick="toggleLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black z-20">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Abrir y cerrar el modal
+        function toggleLoginModal() {
+            document.getElementById('loginModal').classList.toggle('open');
+            // Opcional: Reiniciar a la pestaña de login cada vez que se cierra
+            if(!document.getElementById('loginModal').classList.contains('open')){
+                setTimeout(() => switchTab('login'), 300);
+            }
+        }
+
+        // Cambiar entre Login y Registro
+        function switchTab(tab) {
+            const panelLogin = document.getElementById('panelLogin');
+            const panelRegister = document.getElementById('panelRegister');
+            
+            // Textos dinámicos del panel derecho
+            const sideSubtitle = document.getElementById('sideSubtitle');
+            const sideTitle = document.getElementById('sideTitle');
+            const sideDesc = document.getElementById('sideDesc');
+
+            if (tab === 'register') {
+                panelLogin.classList.add('hidden');
+                panelRegister.classList.remove('hidden');
+                
+                // Actualizar textos a modo Registro
+                sideSubtitle.innerText = 'Únete al equipo';
+                sideTitle.innerHTML = 'CREA<br>TU CUENTA';
+                sideDesc.innerText = 'Regístrate para comprar y guardar tus motocicletas favoritas.';
+            } else {
+                panelRegister.classList.add('hidden');
+                panelLogin.classList.remove('hidden');
+                
+                // Actualizar textos a modo Login
+                sideSubtitle.innerText = 'Bienvenido';
+                sideTitle.innerHTML = 'ACCEDE<br>A TU CUENTA';
+                sideDesc.innerText = 'Gestiona tus pedidos y preferencias.';
+            }
+        }
+
+        // Cerrar el modal al hacer clic afuera
+        document.getElementById('loginModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                toggleLoginModal();
+            }
+        });
+    </script>
+</body>
+</html>
