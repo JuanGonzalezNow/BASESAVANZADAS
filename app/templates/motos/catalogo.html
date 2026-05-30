@@ -35,34 +35,49 @@
             <div class="sticky top-24 space-y-6">
                 <div class="flex items-center justify-between">
                     <h2 class="brand text-xl tracking-widest text-gray-900">FILTROS</h2>
-                    <button onclick="clearFilters()" class="text-[10px] font-bold text-red-600 uppercase tracking-widest hover:underline">Limpiar</button>
+                    <a href="{{ url_for('motos.catalogo') }}" class="text-[10px] font-bold text-red-600 uppercase tracking-widest hover:underline">Limpiar</a>
                 </div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Marca</h3>
-                    <div class="space-y-2 text-sm font-semibold text-gray-700">
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="marca" value="Yamaha"> Yamaha</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="marca" value="Honda"> Honda</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="marca" value="Kawasaki"> Kawasaki</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="marca" value="Suzuki"> Suzuki</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="marca" value="Ducati"> Ducati</label>
+
+                <form id="filterForm" method="GET" class="space-y-4">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Marca</h3>
+                        <div class="space-y-2 text-sm font-semibold text-gray-700">
+                            {% for m in marcas %}
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="marca" value="{{ m.id_marca }}" class="filter-check"
+                                    onchange="document.getElementById('filterForm').submit()"
+                                    {% if marca|string == m.id_marca|string %}checked{% endif %}>
+                                {{ m.nombre_marca }}
+                            </label>
+                            {% endfor %}
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="marca" value="" class="filter-check"
+                                    onchange="document.getElementById('filterForm').submit()"
+                                    {% if not marca %}checked{% endif %}>
+                                Todas
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Precio máximo</h3>
-                    <input type="range" min="10000000" max="85000000" step="1000000" value="85000000"
-                        class="w-full" id="priceRange" oninput="updatePrice(this.value)">
-                    <div class="flex justify-between text-[10px] text-gray-500 font-bold mt-2">
-                        <span>$10M</span>
-                        <span id="priceLabel" class="text-red-600">$85M</span>
+
+                    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Rango de Precio</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">Mínimo ($)</label>
+                                <input type="number" name="precio_min" placeholder="10000000" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500"
+                                    value="{{ precio_min or '' }}" step="1000000">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">Máximo ($)</label>
+                                <input type="number" name="precio_max" placeholder="85000000" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500"
+                                    value="{{ precio_max or 85000000 }}" step="1000000">
+                            </div>
+                            <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-lg text-xs font-bold uppercase hover:bg-red-700 transition-colors">
+                                Filtrar
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Disponibilidad</h3>
-                    <div class="space-y-2 text-sm font-semibold text-gray-700">
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="stock" value="instock"> En stock</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="filter-check" data-filter="stock" value="low"> Stock bajo (&lt;5)</label>
-                    </div>
-                </div>
+                </form>
             </div>
         </aside>
 
@@ -75,11 +90,15 @@
                 </div>
                 <div class="hidden sm:flex items-center gap-2">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ordenar:</label>
-                    <select class="text-xs font-bold border border-gray-200 rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-red-500 bg-white cursor-pointer">
-                        <option>Precio: Menor a Mayor</option>
-                        <option>Precio: Mayor a Menor</option>
-                        <option>Más Nuevos</option>
-                    </select>
+                    <form method="GET" style="display: inline;">
+                        {% if marca %}<input type="hidden" name="marca" value="{{ marca }}">{% endif %}
+                        {% if precio_min %}<input type="hidden" name="precio_min" value="{{ precio_min }}">{% endif %}
+                        {% if precio_max %}<input type="hidden" name="precio_max" value="{{ precio_max }}">{% endif %}
+                        <select name="sort" onchange="this.form.submit()" class="text-xs font-bold border border-gray-200 rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-red-500 bg-white cursor-pointer">
+                            <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                            <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                        </select>
+                    </form>
                 </div>
             </div>
 
@@ -150,18 +169,6 @@
                 searchInput.classList.add('w-0', 'opacity-0');
                 searchInput.classList.remove('w-48', 'opacity-100');
             }
-        }
-
-        function updatePrice(val) {
-            const labelValue = (val / 1000000).toFixed(0);
-            document.getElementById('priceLabel').innerText = `$${labelValue}M`;
-        }
-
-        function clearFilters() {
-            document.querySelectorAll('.filter-check').forEach(cb => cb.checked = false);
-            const priceRange = document.getElementById('priceRange');
-            priceRange.value = 85000000;
-            updatePrice(85000000);
         }
     {% endblock %}
 {% endblock %}
