@@ -157,18 +157,18 @@
             </div>
         </main>
     </div>
+{% endblock %}
 
-    {% block extra_scripts %}
-        function toggleSearch() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput.classList.contains('w-0')) {
-                searchInput.classList.remove('w-0', 'opacity-0');
-                searchInput.classList.add('w-48', 'opacity-100');
-                searchInput.focus();
-            } else {
-                searchInput.classList.add('w-0', 'opacity-0');
-                searchInput.classList.remove('w-48', 'opacity-100');
-            }
-        }
-    {% endblock %}
+{% block extra_scripts %}
+function toggleSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput.classList.contains('w-0')) {
+        searchInput.classList.remove('w-0', 'opacity-0');
+        searchInput.classList.add('w-48', 'opacity-100');
+        searchInput.focus();
+    } else {
+        searchInput.classList.add('w-0', 'opacity-0');
+        searchInput.classList.remove('w-48', 'opacity-100');
+    }
+}
 {% endblock %}
