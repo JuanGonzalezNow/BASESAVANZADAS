@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}RIDEAXIS - Checkout{% endblock %}
+
+{% block extra_styles %}
+.checkout-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    transition: box-shadow 0.3s ease;
+}
+.checkout-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-6xl mx-auto px-6 py-10">
+        <!-- Encabezado -->
+        <div class="mb-10">
+            <a href="{{ url_for('motos.catalogo') }}" class="text-red-600 hover:text-red-700 text-sm font-semibold flex items-center gap-1">
+                <i class="fas fa-chevron-left"></i> Volver al Catálogo
+            </a>
+            <h1 class="brand text-4xl tracking-widest text-gray-900 mt-4">FINALIZAR COMPRA</h1>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Resumen de Compra (Izquierda) -->
+            <div class="lg:col-span-2">
+                <div class="checkout-card bg-white p-6 mb-6">
+                    <h2 class="text-xl font-black text-gray-900 mb-6">Resumen del Carrito</h2>
+
+                    {% if carrito %}
+                        <div class="space-y-4">
+                            {% for item in carrito %}
+                            <div class="flex items-start gap-4 pb-4 border-b border-gray-100">
+                                <div class="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden">
+                                    <img src="{{ item.url_imagen }}" alt="{{ item.modelo }}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-gray-900">{{ item.modelo }}</h3>
+                                    <p class="text-sm text-gray-500">Cantidad: <span class="font-semibold">{{ item.cantidad }}</span></p>
+                                    <p class="text-xs text-gray-400 mt-1">Precio unitario: <span class="font-semibold">${{ '{:,.0f}'.format(item.precio) }}</span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-lg text-gray-900">${{ '{:,.0f}'.format(item.subtotal) }}</p>
+                                    <button onclick="removeFromCart({{ item.id_moto }})" class="text-red-600 hover:text-red-700 text-xs font-semibold mt-2">
+                                        Remover
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-8">Tu carrito está vacío</p>
+                    {% endif %}
+                </div>
+
+                <!-- Información de Entrega -->
+                <div class="checkout-card bg-white p-6">
+                    <h2 class="text-xl font-black text-gray-900 mb-6">Información de Entrega</h2>
+
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p class="text-sm text-blue-900">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>Información del Cliente:</strong><br>
+                                <span class="text-xs">Nombre: {{ usuario.nombre }} {{ usuario.apellido }}</span><br>
+                                <span class="text-xs">Email: {{ usuario.correo_electronico }}</span><br>
+                                <span class="text-xs">Teléfono: {{ usuario.telefono }}</span>
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Dirección de Entrega</label>
+                            <input type="text" id="direccion" placeholder="Calle, número, apartamento..."
+                                   class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500" required>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Ciudad</label>
+                                <input type="text" id="ciudad" placeholder="Bogotá"
+                                       class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Código Postal</label>
+                                <input type="text" id="codigoPostal" placeholder="110111"
+                                       class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Totales y Método de Pago (Derecha) -->
+            <div>
+                <!-- Resumen Totales -->
+                <div class="checkout-card bg-white p-6 mb-6 sticky top-24">
+                    <h3 class="text-lg font-black text-gray-900 mb-4">Resumen de Totales</h3>
+
+                    <div class="space-y-3 mb-4 pb-4 border-b border-gray-100">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="font-semibold text-gray-900">${{ '{:,.0f}'.format(total) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">IVA (19%)</span>
+                            <span class="font-semibold text-gray-900">${{ '{:,.0f}'.format(total * 0.19) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-lg font-black text-gray-900">Total</span>
+                        <span class="text-2xl font-black text-red-600">${{ '{:,.0f}'.format(total * 1.19) }}</span>
+                    </div>
+
+                    <!-- Método de Pago -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-900 mb-3">Método de Pago</label>
+                        <select id="metodoPago" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500" required>
+                            <option value="">Selecciona un método...</option>
+                            <option value="1">Tarjeta de Crédito</option>
+                            <option value="2">Tarjeta Débito</option>
+                            <option value="3">Transferencia Bancaria</option>
+                        </select>
+                    </div>
+
+                    <!-- Términos y Condiciones -->
+                    <label class="flex items-start gap-2 mb-6">
+                        <input type="checkbox" id="terminos" class="mt-1" required>
+                        <span class="text-xs text-gray-600">
+                            Aceptó los <a href="#" class="text-red-600 hover:underline">términos y condiciones</a> y la
+                            <a href="#" class="text-red-600 hover:underline">política de privacidad</a>
+                        </span>
+                    </label>
+
+                    <!-- Botón Confirmar -->
+                    <button onclick="procesarCompra()"
+                            class="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors font-black uppercase text-sm tracking-widest">
+                        Confirmar Compra
+                    </button>
+
+                    <p class="text-xs text-gray-400 text-center mt-3">* Se realizará una compra en tienda local</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+{% endblock %}

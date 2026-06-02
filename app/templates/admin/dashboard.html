@@ -1,0 +1,68 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Total Usuarios -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-semibold">USUARIOS</p>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">{{ stats.total_usuarios }}</p>
+                </div>
+                <i class="fas fa-users text-5xl text-blue-100"></i>
+            </div>
+        </div>
+
+        <!-- Total Motos -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-semibold">MOTOS</p>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">{{ stats.total_motos }}</p>
+                </div>
+                <i class="fas fa-motorcycle text-5xl text-green-100"></i>
+            </div>
+        </div>
+
+        <!-- Total Ventas -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-semibold">VENTAS</p>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">{{ stats.total_ventas }}</p>
+                </div>
+                <i class="fas fa-shopping-cart text-5xl text-yellow-100"></i>
+            </div>
+        </div>
+
+        <!-- Ingresos Totales -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-semibold">INGRESOS</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">${{ '{:,.0f}'.format(stats.ingresos_totales) }}</p>
+                </div>
+                <i class="fas fa-dollar-sign text-5xl text-red-100"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accesos Rápidos -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Accesos Rápidos</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="{{ url_for('admin.listar_motos') }}" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-red-600 hover:bg-red-50 transition">
+                <i class="fas fa-plus text-red-600 text-2xl mb-2"></i>
+                <p class="font-semibold text-gray-900">Agregar Moto</p>
+                <p class="text-sm text-gray-500">Crear nueva motocicleta en el catálogo</p>
+            </a>
+            <a href="{{ url_for('admin.ventas') }}" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition">
+                <i class="fas fa-chart-bar text-blue-600 text-2xl mb-2"></i>
+                <p class="font-semibold text-gray-900">Ver Ventas</p>
+                <p class="text-sm text-gray-500">Consultar estadísticas de ventas</p>
+            </a>
+        </div>
+    </div>
+{% endblock %}

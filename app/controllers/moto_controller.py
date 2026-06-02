@@ -13,12 +13,16 @@ def catalogo():
     query = Motocicleta.query
 
     marca = request.args.get('marca')
+    categoria = request.args.get('categoria')
     precio_min = request.args.get('precio_min', type=float)
-    precio_max = request.args.get('precio_max', type=float, default=85000000)
+    precio_max = request.args.get('precio_max', type=float)
     sort = request.args.get('sort', 'asc')
 
     if marca:
         query = query.filter_by(id_marca=marca)
+
+    if categoria:
+        query = query.filter_by(id_categoria=categoria)
 
     if precio_min:
         query = query.filter(Motocicleta.precio_venta >= precio_min)
@@ -34,10 +38,10 @@ def catalogo():
     motos = query.all()
 
     for moto in motos:
-        moto.marca_nombre = Marca.query.get(moto.id_marca).nombre_marca if moto.id_marca else 'Sin marca'
-        moto.categoria_nombre = Categoria.query.get(moto.id_categoria).nombre_categoria if moto.id_categoria else 'Sin categoría'
+        moto.marca_nombre = moto.marca.nombre_marca if moto.marca else 'Sin marca'
+        moto.categoria_nombre = moto.categoria.nombre_categoria if moto.categoria else 'Sin categoria'
 
     marcas = Marca.query.all()
 
-    return render_template('motos/catalogo.html', motos=motos, marcas=marcas,
-                         marca=marca, precio_min=precio_min, precio_max=precio_max, sort=sort)
+    return render_template('motos/catalogo.html', motos=motos, marcas=marcas, categorias=Categoria.query.all(),
+                         marca=marca, categoria=categoria, precio_min=precio_min, precio_max=precio_max, sort=sort)

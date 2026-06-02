@@ -1,0 +1,329 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Gestion de Motos{% endblock %}
+
+{% block content %}
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-gray-900">Motos en Catalogo</h1>
+            <p class="text-gray-500 mt-2">Gestiona los datos que se muestran a los clientes</p>
+        </div>
+        <button onclick="abrirModalCrear()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold flex items-center gap-2 shadow-lg transition">
+            <i class="fas fa-plus"></i> Nueva Moto
+        </button>
+    </div>
+
+    {% if not marcas or not categorias %}
+        <div class="mb-6 rounded-lg border border-yellow-300 bg-yellow-50 px-5 py-4 text-yellow-900">
+            <p class="font-bold">Faltan datos base para crear motos completas.</p>
+            <p class="text-sm mt-1">Registra primero marcas y categorias en la base de datos para poder seleccionarlas en el formulario.</p>
+        </div>
+    {% endif %}
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div id="motosTopScroll" class="overflow-x-auto border-b border-gray-200 bg-gray-50">
+            <div id="motosTopScrollSpacer" class="h-3"></div>
+        </div>
+
+        <div id="motosTableScroll" class="overflow-x-auto">
+            <table id="motosAdminTable" class="w-full min-w-[1100px]">
+                <thead class="bg-gray-100 border-b-2 border-gray-300">
+                    <tr>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Imagen</th>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Modelo</th>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Marca</th>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Categoria</th>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Ano</th>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Precio</th>
+                        <th class="px-5 py-4 text-left text-sm font-bold text-gray-900">Stock</th>
+                        <th class="px-5 py-4 text-center text-sm font-bold text-gray-900">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="motosTable" class="divide-y divide-gray-200">
+                    {% for moto in motos %}
+                        {% set moto_json = {
+                            'id_moto': moto.id_moto,
+                            'modelo': moto.modelo,
+                            'anio': moto.anio,
+                            'precio_venta': moto.precio_venta|float,
+                            'stock_disponible': moto.stock_disponible,
+                            'descripcion_tecnica': moto.descripcion_tecnica or '',
+                            'url_imagen': moto.url_imagen or '',
+                            'id_marca': moto.id_marca or '',
+                            'id_categoria': moto.id_categoria or ''
+                        } %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-5 py-4">
+                                {% if moto.url_imagen %}
+                                    <img src="{{ moto.url_imagen }}" alt="{{ moto.modelo }}" class="h-14 w-20 rounded object-cover border border-gray-200">
+                                {% else %}
+                                    <div class="h-14 w-20 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-4">
+                                <p class="font-semibold text-gray-900">{{ moto.modelo }}</p>
+                                <p class="text-xs text-gray-500 max-w-xs truncate">{{ moto.descripcion_tecnica or 'Sin descripcion' }}</p>
+                            </td>
+                            <td class="px-5 py-4 text-gray-600">
+                                {{ marcas_por_id.get(moto.id_marca, 'Sin marca') }}
+                            </td>
+                            <td class="px-5 py-4 text-gray-600">
+                                {{ categorias_por_id.get(moto.id_categoria, 'Sin categoria') }}
+                            </td>
+                            <td class="px-5 py-4 text-gray-600">{{ moto.anio }}</td>
+                            <td class="px-5 py-4 text-gray-600 font-semibold">${{ '{:,.0f}'.format(moto.precio_venta) }}</td>
+                            <td class="px-5 py-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold {% if moto.stock_disponible > 5 %}bg-green-100 text-green-800{% elif moto.stock_disponible > 0 %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ moto.stock_disponible }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                <button data-moto='{{ moto_json|tojson }}' onclick="abrirModalEditar(this)"
+                                        class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition mr-2 inline-block">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button onclick="eliminarMoto({{ moto.id_moto }})"
+                                        class="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition inline-block">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                <i class="fas fa-inbox text-4xl mb-3"></i>
+                                <p>No hay motos registradas</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modalMoto" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 px-4 py-6">
+        <div class="bg-white rounded-lg p-8 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4 mb-6">
+                <div>
+                    <h2 id="modalTitle" class="text-2xl font-bold text-gray-900">Nueva Moto</h2>
+                    <p class="text-sm text-gray-500 mt-1">Completa la informacion para que la moto se vea bien en el catalogo.</p>
+                </div>
+                <button type="button" onclick="cerrarModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="formMoto" onsubmit="guardarMoto(event)">
+                <input type="hidden" id="id_moto">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="modelo" class="block text-sm font-bold text-gray-900 mb-2">Modelo</label>
+                        <input type="text" id="modelo" name="modelo" class="w-full border-2 border-gray-300 rounded px-4 py-2 focus:border-red-600 focus:outline-none" required>
+                    </div>
+
+                    <div>
+                        <label for="anio" class="block text-sm font-bold text-gray-900 mb-2">Ano</label>
+                        <input type="number" id="anio" name="anio" min="1900" max="2100" class="w-full border-2 border-gray-300 rounded px-4 py-2 focus:border-red-600 focus:outline-none" required>
+                    </div>
+
+                    <div>
+                        <label for="id_marca" class="block text-sm font-bold text-gray-900 mb-2">Marca</label>
+                        <select id="id_marca" name="id_marca" class="w-full border-2 border-gray-300 rounded px-4 py-2 bg-white focus:border-red-600 focus:outline-none" required>
+                            <option value="" disabled selected>Selecciona una marca</option>
+                            {% for marca in marcas %}
+                                <option value="{{ marca.id_marca }}">{{ marca.nombre_marca }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="id_categoria" class="block text-sm font-bold text-gray-900 mb-2">Categoria</label>
+                        <select id="id_categoria" name="id_categoria" class="w-full border-2 border-gray-300 rounded px-4 py-2 bg-white focus:border-red-600 focus:outline-none" required>
+                            <option value="" disabled selected>Selecciona una categoria</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id_categoria }}">{{ categoria.nombre_categoria }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="precio_venta" class="block text-sm font-bold text-gray-900 mb-2">Precio Venta ($)</label>
+                        <input type="number" id="precio_venta" name="precio_venta" min="0" step="0.01" class="w-full border-2 border-gray-300 rounded px-4 py-2 focus:border-red-600 focus:outline-none" required>
+                    </div>
+
+                    <div>
+                        <label for="stock_disponible" class="block text-sm font-bold text-gray-900 mb-2">Stock</label>
+                        <input type="number" id="stock_disponible" name="stock_disponible" min="0" class="w-full border-2 border-gray-300 rounded px-4 py-2 focus:border-red-600 focus:outline-none" required>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="url_imagen" class="block text-sm font-bold text-gray-900 mb-2">URL de imagen</label>
+                        <input type="url" id="url_imagen" name="url_imagen" placeholder="https://..." class="w-full border-2 border-gray-300 rounded px-4 py-2 focus:border-red-600 focus:outline-none" required>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="descripcion_tecnica" class="block text-sm font-bold text-gray-900 mb-2">Descripcion tecnica</label>
+                        <textarea id="descripcion_tecnica" name="descripcion_tecnica" maxlength="500" rows="4" class="w-full border-2 border-gray-300 rounded px-4 py-2 focus:border-red-600 focus:outline-none resize-none" required></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Maximo 500 caracteres.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                    <button type="submit" class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-bold transition">
+                        Guardar
+                    </button>
+                    <button type="button" onclick="cerrarModal()" class="flex-1 bg-gray-300 text-gray-900 py-3 rounded-lg hover:bg-gray-400 font-bold transition">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalCrear() {
+            document.getElementById('id_moto').value = '';
+            document.getElementById('modalTitle').textContent = 'Nueva Moto';
+            document.getElementById('formMoto').reset();
+            document.getElementById('modalMoto').classList.remove('hidden');
+            document.getElementById('modalMoto').classList.add('flex');
+        }
+
+        function abrirModalEditar(button) {
+            const moto = JSON.parse(button.dataset.moto);
+
+            document.getElementById('id_moto').value = moto.id_moto;
+            document.getElementById('modalTitle').textContent = 'Editar Moto';
+            document.getElementById('modelo').value = moto.modelo || '';
+            document.getElementById('anio').value = moto.anio || '';
+            document.getElementById('precio_venta').value = moto.precio_venta || '';
+            document.getElementById('stock_disponible').value = moto.stock_disponible ?? '';
+            document.getElementById('descripcion_tecnica').value = moto.descripcion_tecnica || '';
+            document.getElementById('url_imagen').value = moto.url_imagen || '';
+            document.getElementById('id_marca').value = moto.id_marca || '';
+            document.getElementById('id_categoria').value = moto.id_categoria || '';
+            document.getElementById('modalMoto').classList.remove('hidden');
+            document.getElementById('modalMoto').classList.add('flex');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalMoto').classList.add('hidden');
+            document.getElementById('modalMoto').classList.remove('flex');
+        }
+
+        function valorEnteroONull(id) {
+            const value = document.getElementById(id).value;
+            return value === '' ? null : parseInt(value, 10);
+        }
+
+        async function guardarMoto(e) {
+            e.preventDefault();
+            const id_moto = document.getElementById('id_moto').value;
+            const csrf_token = document.querySelector('input[name="csrf_token"]').value;
+
+            const datos = {
+                modelo: document.getElementById('modelo').value.trim(),
+                anio: parseInt(document.getElementById('anio').value, 10),
+                precio_venta: parseFloat(document.getElementById('precio_venta').value),
+                stock_disponible: parseInt(document.getElementById('stock_disponible').value, 10),
+                descripcion_tecnica: document.getElementById('descripcion_tecnica').value.trim(),
+                url_imagen: document.getElementById('url_imagen').value.trim(),
+                id_marca: valorEnteroONull('id_marca'),
+                id_categoria: valorEnteroONull('id_categoria')
+            };
+
+            const url = id_moto ? `/admin/motos/${id_moto}/editar` : '/admin/motos/crear';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrf_token
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error de conexion: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        async function eliminarMoto(id) {
+            if (confirm('Estas seguro de que deseas eliminar esta moto?')) {
+                const csrf_token = document.querySelector('input[name="csrf_token"]').value;
+
+                try {
+                    const response = await fetch(`/admin/motos/${id}/eliminar`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrf_token
+                        }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.message);
+                    }
+                } catch (error) {
+                    alert('Error de conexion: ' + error.message);
+                    console.error(error);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const topScroll = document.getElementById('motosTopScroll');
+            const tableScroll = document.getElementById('motosTableScroll');
+            const table = document.getElementById('motosAdminTable');
+            const spacer = document.getElementById('motosTopScrollSpacer');
+
+            if (!topScroll || !tableScroll || !table || !spacer) {
+                return;
+            }
+
+            const actualizarAnchoScroll = () => {
+                spacer.style.width = `${table.scrollWidth}px`;
+            };
+
+            let sincronizando = false;
+
+            topScroll.addEventListener('scroll', () => {
+                if (sincronizando) {
+                    return;
+                }
+
+                sincronizando = true;
+                tableScroll.scrollLeft = topScroll.scrollLeft;
+                sincronizando = false;
+            });
+
+            tableScroll.addEventListener('scroll', () => {
+                if (sincronizando) {
+                    return;
+                }
+
+                sincronizando = true;
+                topScroll.scrollLeft = tableScroll.scrollLeft;
+                sincronizando = false;
+            });
+
+            actualizarAnchoScroll();
+            window.addEventListener('resize', actualizarAnchoScroll);
+        });
+    </script>
+{% endblock %}

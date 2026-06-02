@@ -1,0 +1,158 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}SQL Console{% endblock %}
+
+{% block content %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-bolt text-yellow-500"></i> Templates
+                </h3>
+
+                <div class="space-y-2.5">
+                    <button type="button" onclick="insertarTemplate('SELECT * FROM usuarios;')" class="w-full text-left px-4 py-3 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 text-sm font-medium transition">
+                        <i class="fas fa-users mr-2"></i> Todos los Usuarios
+                    </button>
+
+                    <button type="button" onclick="insertarTemplate('SELECT * FROM motocicletas;')" class="w-full text-left px-4 py-3 bg-green-100 text-green-900 rounded-lg hover:bg-green-200 text-sm font-medium transition">
+                        <i class="fas fa-motorcycle mr-2"></i> Todas las Motos
+                    </button>
+
+                    <button type="button" onclick="insertarTemplate('SELECT * FROM facturas;')" class="w-full text-left px-4 py-3 bg-yellow-100 text-yellow-900 rounded-lg hover:bg-yellow-200 text-sm font-medium transition">
+                        <i class="fas fa-receipt mr-2"></i> Todas las Facturas
+                    </button>
+
+                    <button type="button" onclick="insertarTemplate('SELECT COUNT(*) AS total FROM usuarios;')" class="w-full text-left px-4 py-3 bg-purple-100 text-purple-900 rounded-lg hover:bg-purple-200 text-sm font-medium transition">
+                        <i class="fas fa-chart-bar mr-2"></i> Total Usuarios
+                    </button>
+
+                    <button type="button" onclick="insertarTemplate('SELECT modelo, stock_disponible FROM motocicletas WHERE stock_disponible < 5;')" class="w-full text-left px-4 py-3 bg-red-100 text-red-900 rounded-lg hover:bg-red-200 text-sm font-medium transition">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> Stock Bajo
+                    </button>
+
+                    <button type="button" onclick="insertarTemplate('SELECT numero_factura, total_pagar, fecha_emision FROM facturas ORDER BY fecha_emision DESC LIMIT 10;')" class="w-full text-left px-4 py-3 bg-indigo-100 text-indigo-900 rounded-lg hover:bg-indigo-200 text-sm font-medium transition">
+                        <i class="fas fa-history mr-2"></i> Ultimas Ventas
+                    </button>
+
+                    <button type="button" onclick="insertarTemplate('SELECT id_moto, SUM(cantidad_vendida) AS vendidas FROM detalles_factura GROUP BY id_moto ORDER BY vendidas DESC LIMIT 5;')" class="w-full text-left px-4 py-3 bg-pink-100 text-pink-900 rounded-lg hover:bg-pink-200 text-sm font-medium transition">
+                        <i class="fas fa-star mr-2"></i> Top 5 Motos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Ejecutor de Queries</h2>
+
+                <div class="mb-6">
+                    <label for="sqlQuery" class="block text-sm font-bold text-gray-900 mb-3">Query SELECT</label>
+                    <textarea id="sqlQuery" class="w-full h-48 border-2 border-gray-300 rounded-lg px-4 py-3 font-mono text-sm focus:border-red-600 focus:outline-none"
+                              placeholder="SELECT * FROM usuarios LIMIT 10;"></textarea>
+                </div>
+
+                <div class="flex gap-3 mb-6">
+                    <button type="button" onclick="ejecutarSQL()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold flex items-center gap-2 shadow transition">
+                        <i class="fas fa-play"></i> Ejecutar
+                    </button>
+                    <button type="button" onclick="limpiarConsola()" class="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold transition">
+                        <i class="fas fa-eraser"></i> Limpiar
+                    </button>
+                </div>
+
+                <div id="resultados" class="hidden bg-gray-50 border-2 border-gray-300 rounded-lg overflow-x-auto">
+                    <div id="resultadosContent" class="overflow-x-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function insertarTemplate(query) {
+            const queryInput = document.getElementById('sqlQuery');
+            queryInput.value = query;
+            queryInput.focus();
+        }
+
+        function limpiarConsola() {
+            document.getElementById('sqlQuery').value = '';
+            document.getElementById('resultados').classList.add('hidden');
+            document.getElementById('resultadosContent').innerHTML = '';
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        async function ejecutarSQL() {
+            const query = document.getElementById('sqlQuery').value.trim();
+
+            if (!query) {
+                alert('Ingresa una query');
+                return;
+            }
+
+            try {
+                const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+                const response = await fetch('{{ url_for("admin.ejecutor_sql") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarResultados(result.columns, result.rows);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        function mostrarResultados(columns, rows) {
+            let html = '<table class="w-full"><thead class="bg-gray-200"><tr>';
+
+            columns.forEach((col) => {
+                html += `<th class="px-4 py-3 text-left text-sm font-bold border-b">${escapeHtml(col)}</th>`;
+            });
+
+            html += '</tr></thead><tbody>';
+
+            if (rows.length === 0) {
+                html += `<tr><td class="px-4 py-6 text-center text-sm text-gray-500" colspan="${columns.length}">Sin resultados</td></tr>`;
+            } else {
+                rows.forEach((row, idx) => {
+                    html += `<tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-gray-100'}">`;
+                    columns.forEach((col) => {
+                        const value = row[col];
+                        const display = value === null || value === undefined ? 'NULL' : value;
+                        html += `<td class="px-4 py-3 text-sm border-b text-gray-700">${escapeHtml(display)}</td>`;
+                    });
+                    html += '</tr>';
+                });
+            }
+
+            html += '</tbody></table>';
+            html += `<p class="p-4 text-sm text-gray-600 border-t font-semibold"><i class="fas fa-check-circle text-green-600 mr-2"></i>Total de registros: <strong>${rows.length}</strong></p>`;
+
+            document.getElementById('resultadosContent').innerHTML = html;
+            document.getElementById('resultados').classList.remove('hidden');
+        }
+    </script>
+{% endblock %}

@@ -13,29 +13,46 @@
         .brand { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.12em; }
 
         .nav-link { position: relative; }
-        .nav-link::after { content:''; position:absolute; left:0; bottom:-2px; width:0; height:2px; background:#dc2626; transition:width 0.25s ease; }
-        .nav-link:hover::after, .nav-link.active::after { width:100%; }
+        .nav-link::after {
+            content: ''; position: absolute; left: 0; bottom: -2px;
+            width: 0; height: 2px; background: #dc2626; transition: width 0.25s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
 
-        @keyframes pulse-badge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+        @keyframes pulse-badge { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.2) } }
         .badge-pulse { animation: pulse-badge 2s infinite; }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 999px; }
 
+        /* ── MODAL ─────────────────────────────────────── */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.65);
-            backdrop-filter: blur(4px); z-index: 100;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 100;
             display: none;
-            align-items: center; justify-content: center; padding: 16px;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
         }
         .modal-overlay.open { display: flex; }
 
+        /* ── AUTH CARD ──────────────────────────────────── */
         .auth-card {
-            background: #fff; border-radius: 24px; width: 100%; max-width: 820px;
-            display: grid; grid-template-columns: 1fr 1fr;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.22); position: relative;
+            background: #fff;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 820px;
+            min-height: 520px;            /* altura mínima consistente */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+            position: relative;
             overflow: hidden;
+            margin: auto;                 /* centrado horizontal garantizado */
         }
 
         @media (max-width: 640px) {
@@ -43,53 +60,136 @@
             .auth-side { display: none; }
         }
 
-        .auth-left { display: flex; flex-direction: column; padding: 40px; }
+        /* ── AUTH LEFT ──────────────────────────────────── */
+        .auth-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 50px 44px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        /* ── INPUTS ─────────────────────────────────────── */
         .auth-input {
-            width: 100%; background: #f9fafb; border: 1.5px solid #e5e7eb;
-            border-radius: 12px; padding: 11px 14px 11px 38px; font-weight: 700; font-size: 13px;
+            width: 100%;
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 14px 12px 40px;
+            font-weight: 700;
+            font-size: 13px;
             font-family: 'Barlow', sans-serif;
+            line-height: 1.5;
+            height: 42px;
+            box-sizing: border-box;
         }
-        .auth-input:focus { outline:none; border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,0.09); }
+        .auth-input:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.09);
+        }
 
+        /* ícono dentro del input */
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 14px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ── BOTÓN ──────────────────────────────────────── */
         .auth-btn {
-            width: 100%; background: #dc2626; color: #fff; border-radius: 14px;
-            padding: 13px; font-weight: 900; font-size: 11px; text-transform: uppercase;
-            cursor: pointer; transition: background 0.2s;
+            width: 100%;
+            background: #dc2626;
+            color: #fff;
+            border-radius: 14px;
+            padding: 13px;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            margin-top: 8px;
         }
-        .auth-btn:hover { background:#b91c1c; }
+        .auth-btn:hover { background: #b91c1c; }
 
+        /* ── PANEL LATERAL ──────────────────────────────── */
         .auth-side {
             background-image: url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=900');
-            background-size: cover; background-position: center;
+            background-size: cover;
+            background-position: center;
             position: relative;
         }
         .auth-side::before {
-            content:''; position:absolute; inset:0;
-            background: linear-gradient(135deg, rgba(220,38,38,0.72) 0%, rgba(0,0,0,0.78) 100%);
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.72) 0%, rgba(0, 0, 0, 0.78) 100%);
         }
-        .auth-side-content { position:relative; z-index:1; }
+        .auth-side-content {
+            position: relative;
+            z-index: 1;
+        }
 
         {% block extra_styles %}{% endblock %}
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
 
+    <!-- ── NAVBAR ──────────────────────────────────────────── -->
     <nav class="bg-white shadow-sm py-0 px-8 sticky top-0 z-50 border-b border-gray-100">
-        <div class="max-w-screen-xl mx-auto flex items-center justify-between h-16">
+        <div class="max-w-screen-xl mx-auto flex items-center justify-between h-16 w-full">
             <a href="{{ url_for('main.home') }}" class="brand text-3xl text-red-600 tracking-[.12em]">RIDEAXIS</a>
+
             <div class="hidden md:flex items-center space-x-8 text-[11px] font-bold uppercase tracking-widest text-gray-600">
-                <a href="{{ url_for('main.home') }}" class="nav-link {% if request.endpoint == 'main.home' %}active text-gray-900{% endif %}">Inicio</a>
-                <a href="{{ url_for('motos.catalogo') }}" class="nav-link {% if request.endpoint == 'motos.catalogo' %}active text-gray-900{% endif %}">Motos</a>
-                <a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active text-gray-900{% endif %}">Sobre Nosotros</a>
+                <a href="{{ url_for('main.home') }}"
+                   class="nav-link {% if request.endpoint == 'main.home' %}active text-gray-900{% endif %}">Inicio</a>
+                <a href="{{ url_for('motos.catalogo') }}"
+                   class="nav-link {% if request.endpoint == 'motos.catalogo' %}active text-gray-900{% endif %}">Motos</a>
+                <a href="{{ url_for('main.about') }}"
+                   class="nav-link {% if request.endpoint == 'main.about' %}active text-gray-900{% endif %}">Sobre Nosotros</a>
             </div>
+
             <div class="flex items-center space-x-5 text-gray-600">
                 {% block nav_extra %}{% endblock %}
+
+                {% if session.get('id_usuario') %}
+                <!-- Dropdown Usuario (Logged In) -->
+                <div class="relative" id="userMenuContainer">
+                    <button onclick="toggleUserMenu()" class="hover:text-red-600 transition-colors flex items-center gap-2 py-2" title="Cuenta">
+                        <i class="fas fa-user text-sm"></i>
+                        <span class="text-xs font-semibold hidden sm:inline">{{ session.nombre_usuario }}</span>
+                    </button>
+                    <div id="userDropdown" class="hidden absolute top-full right-0 mt-2 bg-white shadow-lg rounded-lg p-4 min-w-[220px] z-50 border border-gray-100">
+                        <p class="font-bold text-gray-900 text-sm">{{ session.nombre_usuario }}</p>
+                        <p class="text-xs text-gray-600 mb-3">{{ session.correo_electronico }}</p>
+                        <hr class="my-2">
+                        <a href="{{ url_for('auth.logout') }}" class="block text-red-600 hover:bg-red-50 px-2 py-2 rounded text-xs font-semibold transition-colors">
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Botón Login (No Logged In) -->
                 <button onclick="toggleLoginModal()" class="hover:text-red-600 transition-colors" title="Cuenta">
                     <i class="fas fa-user text-sm"></i>
                 </button>
-                <button class="relative hover:text-red-600 transition-colors" title="Carrito">
+                {% endif %}
+
+                <button class="relative hover:text-red-600 transition-colors" title="Carrito" onclick="irACheckout()">
                     <i class="fas fa-shopping-cart text-sm"></i>
-                    <span class="badge-pulse absolute -top-2 -right-2 bg-red-600 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
+                    <span class="badge-pulse absolute -top-2 -right-2 bg-red-600 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black" id="cartBadge">0</span>
                 </button>
                 <button class="md:hidden hover:text-red-600 transition-colors">
                     <i class="fas fa-bars text-sm"></i>
@@ -100,161 +200,284 @@
 
     {% block content %}{% endblock %}
 
+    <!-- ── MODAL AUTH ───────────────────────────────────────── -->
     <div id="loginModal" class="modal-overlay">
         <div class="auth-card">
-            <div class="auth-left relative overflow-y-auto max-h-[90vh]">
-                <p class="brand text-3xl text-red-600 mb-5">RIDEAXIS</p>
 
+            <!-- Columna izquierda: formularios -->
+            <div class="auth-left">
+                <p class="brand text-3xl text-red-600 mb-6">RIDEAXIS</p>
+
+                <!-- LOGIN -->
                 <div id="panelLogin">
-                    <form class="space-y-4">
+                    <h2 class="text-xl font-black text-gray-800 mb-2 leading-tight">Bienvenido de nuevo</h2>
+                    <p class="text-xs text-gray-400 font-semibold mb-8">Ingresa con tu cuenta para continuar</p>
+
+                    <form id="loginForm" class="space-y-5">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Correo Electrónico</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Correo Electrónico
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-envelope"></i></span>
-                                <input type="email" class="auth-input" placeholder="correo@ejemplo.com" required>
+                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="correo_electronico" class="auth-input"
+                                       placeholder="correo@ejemplo.com" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="loginError_correo_electronico"></small>
                             </div>
                         </div>
+
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Contraseña</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Contraseña
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-lock"></i></span>
-                                <input type="password" class="auth-input" placeholder="••••••••" required>
+                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="contrasena_hash" class="auth-input"
+                                       placeholder="••••••••" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="loginError_contrasena_hash"></small>
                             </div>
                         </div>
+
                         <button type="submit" class="auth-btn">Ingresar</button>
 
-                        <p class="text-center text-xs text-gray-500 font-medium mt-4">
+                        <p class="text-center text-xs text-gray-500 font-medium pt-1">
                             ¿No tienes cuenta?
-                            <button type="button" onclick="switchTab('register')" class="text-red-600 font-bold hover:underline">Regístrate</button>
+                            <button type="button" onclick="switchTab('register')"
+                                    class="text-red-600 font-bold hover:underline">Regístrate</button>
                         </p>
                     </form>
                 </div>
 
+                <!-- REGISTRO -->
                 <div id="panelRegister" class="hidden">
-                    <form class="space-y-4">
+                    <h2 class="text-xl font-black text-gray-800 mb-2 leading-tight">Crea tu cuenta</h2>
+                    <p class="text-xs text-gray-400 font-semibold mb-7">Completa los datos para registrarte</p>
+
+                    <form id="registroForm" class="space-y-4">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Nombre -->
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nombre Completo</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Nombre Completo
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
-                                <input type="text" class="auth-input" placeholder="Nombre" required>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Apellido Completo</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-user"></i></span>
-                                <input type="text" class="auth-input" placeholder="Apellido" required>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Telefono</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-phone"></i></span>
-                                <input type="text" class="auth-input" placeholder="3214567898" required>
+                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                <input type="text" name="nombre" class="auth-input" placeholder="Nombre" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="registroError_nombre"></small>
                             </div>
                         </div>
 
+                        <!-- Apellido -->
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Tipo de Documento</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Apellido Completo
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-id-card"></i></span>
-                                <select name="tipo_documento" class="auth-input appearance-none cursor-pointer bg-white" required>
+                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                <input type="text" name="apellido" class="auth-input" placeholder="Apellido" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="registroError_apellido"></small>
+                            </div>
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Teléfono
+                            </label>
+                            <div class="relative">
+                                <span class="input-icon"><i class="fas fa-phone"></i></span>
+                                <input type="text" name="telefono" class="auth-input"
+                                       placeholder="3214567898" maxlength="10" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="registroError_telefono"></small>
+                            </div>
+                        </div>
+
+                        <!-- Tipo Documento -->
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Tipo de Documento
+                            </label>
+                            <div class="relative">
+                                <span class="input-icon"><i class="fas fa-id-card"></i></span>
+                                <select name="id_tipo_documento"
+                                        class="auth-input appearance-none cursor-pointer bg-white" required>
                                     <option value="" disabled selected>Selecciona un tipo...</option>
-                                    <option value="CC">Cédula de Ciudadanía (CC)</option>
-                                    <option value="TI">Tarjeta de Identidad (TI)</option>
-                                    <option value="CE">Cédula de Extranjería (CE)</option>
-                                    <option value="PA">Pasaporte (PA)</option>
-                                    <option value="PPT">Permiso de Protección Temporal (PPT)</option>
-                                    <option value="NIT">NIT (Empresa)</option>
+                                    <option value="1">Cédula de Ciudadanía (CC)</option>
+                                    <option value="2">Tarjeta de Identidad (TI)</option>
+                                    <option value="3">Cédula de Extranjería (CE)</option>
+                                    <option value="4">Pasaporte (PA)</option>
+                                    <option value="5">Permiso de Protección Temporal (PPT)</option>
+                                    <option value="6">NIT (Empresa)</option>
                                 </select>
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">
+                                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">
                                     <i class="fas fa-chevron-down"></i>
                                 </span>
                             </div>
                         </div>
 
+                        <!-- Número Documento -->
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Numero de Documento</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Número de Documento
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-hashtag"></i></span>
-                                <input type="text" class="auth-input" placeholder="Digita El Numero De Documento" required>
+                                <span class="input-icon"><i class="fas fa-hashtag"></i></span>
+                                <input type="text" name="numero_documento" class="auth-input"
+                                       placeholder="Número de documento" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="registroError_numero_documento"></small>
                             </div>
                         </div>
+
+                        <!-- Correo -->
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Correo Electrónico</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Correo Electrónico
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-envelope"></i></span>
-                                <input type="email" class="auth-input" placeholder="correo@ejemplo.com" required>
+                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="correo_electronico" class="auth-input"
+                                       placeholder="correo@ejemplo.com" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="registroError_correo_electronico"></small>
                             </div>
                         </div>
+
+                        <!-- Contraseña -->
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1.5">Contraseña</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                                Contraseña
+                            </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"><i class="fas fa-lock"></i></span>
-                                <input type="password" class="auth-input" placeholder="••••••••" required>
+                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="contrasena_hash" class="auth-input"
+                                       placeholder="••••••••" required>
+                                <small class="text-red-500 text-xs hidden mt-1 block" id="registroError_contrasena_hash"></small>
                             </div>
                         </div>
+
                         <button type="submit" class="auth-btn">Crear Cuenta</button>
 
-                        <p class="text-center text-xs text-gray-500 font-medium mt-4">
+                        <p class="text-center text-xs text-gray-500 font-medium pt-1">
                             ¿Ya tienes cuenta?
-                            <button type="button" onclick="switchTab('login')" class="text-red-600 font-bold hover:underline">Inicia Sesión</button>
+                            <button type="button" onclick="switchTab('login')"
+                                    class="text-red-600 font-bold hover:underline">Inicia Sesión</button>
                         </p>
                     </form>
                 </div>
             </div>
 
+            <!-- Columna derecha: imagen decorativa -->
             <div class="auth-side">
                 <div class="auth-side-content flex flex-col justify-end p-10 h-full">
-                    <p id="sideSubtitle" class="text-[10px] text-red-300 font-black uppercase tracking-[.25em] mb-2">Bienvenido</p>
-                    <h2 id="sideTitle" class="brand text-5xl text-white leading-none mb-3">ACCEDE<br>A TU CUENTA</h2>
-                    <p id="sideDesc" class="text-gray-300 text-xs font-semibold max-w-[220px]">Gestiona tus pedidos y preferencias.</p>
+                    <p id="sideSubtitle" class="text-[10px] text-red-300 font-black uppercase tracking-[.25em] mb-2">
+                        Bienvenido
+                    </p>
+                    <h2 id="sideTitle" class="brand text-5xl text-white leading-none mb-3">
+                        ACCEDE<br>A TU CUENTA
+                    </h2>
+                    <p id="sideDesc" class="text-gray-300 text-xs font-semibold max-w-[220px]">
+                        Gestiona tus pedidos y preferencias.
+                    </p>
                 </div>
             </div>
 
-            <button onclick="toggleLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black z-20">
+            <!-- Botón cerrar -->
+            <button onclick="toggleLoginModal()"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-black z-20 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
     </div>
 
     <script>
+        // Variables globales
+        const csrf_token = "{{ csrf_token() }}";
+        const isLoggedIn = {{ 'true' if session.get('id_usuario') else 'false' }};
+
         function toggleLoginModal() {
             document.getElementById('loginModal').classList.toggle('open');
-            if(!document.getElementById('loginModal').classList.contains('open')){
+            if (!document.getElementById('loginModal').classList.contains('open')) {
                 setTimeout(() => switchTab('login'), 300);
             }
         }
 
         function switchTab(tab) {
-            const panelLogin = document.getElementById('panelLogin');
+            const panelLogin    = document.getElementById('panelLogin');
             const panelRegister = document.getElementById('panelRegister');
-            const sideSubtitle = document.getElementById('sideSubtitle');
-            const sideTitle = document.getElementById('sideTitle');
-            const sideDesc = document.getElementById('sideDesc');
+            const sideSubtitle  = document.getElementById('sideSubtitle');
+            const sideTitle     = document.getElementById('sideTitle');
+            const sideDesc      = document.getElementById('sideDesc');
 
             if (tab === 'register') {
                 panelLogin.classList.add('hidden');
                 panelRegister.classList.remove('hidden');
-                sideSubtitle.innerText = 'Únete al equipo';
-                sideTitle.innerHTML = 'CREA<br>TU CUENTA';
-                sideDesc.innerText = 'Regístrate para comprar y guardar tus motocicletas favoritas.';
+                sideSubtitle.innerText  = 'Únete al equipo';
+                sideTitle.innerHTML     = 'CREA<br>TU CUENTA';
+                sideDesc.innerText      = 'Regístrate para comprar y guardar tus motocicletas favoritas.';
             } else {
                 panelRegister.classList.add('hidden');
                 panelLogin.classList.remove('hidden');
-                sideSubtitle.innerText = 'Bienvenido';
-                sideTitle.innerHTML = 'ACCEDE<br>A TU CUENTA';
-                sideDesc.innerText = 'Gestiona tus pedidos y preferencias.';
+                sideSubtitle.innerText  = 'Bienvenido';
+                sideTitle.innerHTML     = 'ACCEDE<br>A TU CUENTA';
+                sideDesc.innerText      = 'Gestiona tus pedidos y preferencias.';
             }
         }
 
-        document.getElementById('loginModal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                toggleLoginModal();
+        document.getElementById('loginModal').addEventListener('click', function (event) {
+            if (event.target === this) toggleLoginModal();
+        });
+
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+        }
+
+        // Cerrar dropdown cuando se hace click fuera
+        document.addEventListener('click', function (event) {
+            const userMenu = document.getElementById('userMenuContainer');
+            if (userMenu && !userMenu.contains(event.target)) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown) {
+                    dropdown.classList.add('hidden');
+                }
             }
         });
 
+        function irACheckout() {
+            const isLoggedIn = {{ 'true' if session.get('id_usuario') else 'false' }};
+            if (!isLoggedIn) {
+                toggleLoginModal();
+                switchTab('login');
+                showToast('Debes iniciar sesión para finalizar la compra', '', 'error');
+            } else {
+                location.href = '/checkout';
+            }
+        }
+
+        async function updateCartBadge() {
+            try {
+                const response = await fetch('/carrito');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('cartBadge').textContent = data.total_items;
+                }
+            } catch (error) {
+                console.error('Error actualizando carrito:', error);
+            }
+        }
+
+        // Actualizar badge al cargar
+        if ({{ 'true' if session.get('id_usuario') else 'false' }}) {
+            updateCartBadge();
+        }
+
         {% block extra_scripts %}{% endblock %}
     </script>
+    <script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 </body>
 </html>

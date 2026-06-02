@@ -9,6 +9,18 @@
     .product-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px -10px rgba(0,0,0,0.15); }
     .filter-check { accent-color: #dc2626; }
     input[type=range] { accent-color: #dc2626; }
+    .price-display { font-weight: bold; color: #dc2626; }
+    .filters-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #dc2626 transparent;
+    }
+    .filters-scroll::-webkit-scrollbar { width: 3px; }
+    .filters-scroll::-webkit-scrollbar-track { background: transparent; }
+    .filters-scroll::-webkit-scrollbar-thumb {
+        background: #dc2626;
+        border-radius: 999px;
+    }
+    .filters-scroll::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
 {% endblock %}
 
 {% block nav_extra %}
@@ -32,13 +44,15 @@
     <div class="max-w-screen-xl mx-auto px-6 py-10 flex gap-8">
 
         <aside class="hidden lg:block w-64 flex-shrink-0">
-            <div class="sticky top-24 space-y-6">
+            <div class="filters-scroll sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1 space-y-6">
                 <div class="flex items-center justify-between">
                     <h2 class="brand text-xl tracking-widest text-gray-900">FILTROS</h2>
                     <a href="{{ url_for('motos.catalogo') }}" class="text-[10px] font-bold text-red-600 uppercase tracking-widest hover:underline">Limpiar</a>
                 </div>
 
                 <form id="filterForm" method="GET" class="space-y-4">
+                    <input type="hidden" name="sort" value="{{ sort }}">
+
                     <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                         <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Marca</h3>
                         <div class="space-y-2 text-sm font-semibold text-gray-700">
@@ -60,20 +74,51 @@
                     </div>
 
                     <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Categoría</h3>
+                        <div class="space-y-2 text-sm font-semibold text-gray-700">
+                            {% for c in categorias %}
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="categoria" value="{{ c.id_categoria }}" class="filter-check"
+                                    onchange="document.getElementById('filterForm').submit()"
+                                    {% if categoria|string == c.id_categoria|string %}checked{% endif %}>
+                                {{ c.nombre_categoria }}
+                            </label>
+                            {% endfor %}
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="categoria" value="" class="filter-check"
+                                    onchange="document.getElementById('filterForm').submit()"
+                                    {% if not categoria %}checked{% endif %}>
+                                Todas
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                         <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Rango de Precio</h3>
                         <div class="space-y-3">
                             <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">Mínimo ($)</label>
-                                <input type="number" name="precio_min" placeholder="10000000" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500"
+                                <label class="text-[10px] text-gray-500">Mínimo ($)</label>
+                                <input type="number" id="precioMin" name="precio_min" placeholder="0"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500 mt-1"
                                     value="{{ precio_min or '' }}" step="1000000">
                             </div>
                             <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">Máximo ($)</label>
-                                <input type="number" name="precio_max" placeholder="85000000" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500"
-                                    value="{{ precio_max or 85000000 }}" step="1000000">
+                                <label class="text-[10px] text-gray-500">Máximo ($)</label>
+                                <input type="number" id="precioMax" name="precio_max" placeholder="Sin límite"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500 mt-1"
+                                    value="{{ precio_max or '' }}" step="1000000">
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg text-[10px] text-gray-600">
+                                <p><span class="font-bold">Rango seleccionado:</span> <span class="price-display" id="rangeDisplay">
+                                    {% if precio_min or precio_max %}
+                                        ${{ '{:,.0f}'.format(precio_min or 0) }} - ${{ '{:,.0f}'.format(precio_max) if precio_max else 'Sin límite' }}
+                                    {% else %}
+                                        Cualquier precio
+                                    {% endif %}
+                                </span></p>
                             </div>
                             <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-lg text-xs font-bold uppercase hover:bg-red-700 transition-colors">
-                                Filtrar
+                                Filtrar Rango
                             </button>
                         </div>
                     </div>
@@ -92,6 +137,7 @@
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ordenar:</label>
                     <form method="GET" style="display: inline;">
                         {% if marca %}<input type="hidden" name="marca" value="{{ marca }}">{% endif %}
+                        {% if categoria %}<input type="hidden" name="categoria" value="{{ categoria }}">{% endif %}
                         {% if precio_min %}<input type="hidden" name="precio_min" value="{{ precio_min }}">{% endif %}
                         {% if precio_max %}<input type="hidden" name="precio_max" value="{{ precio_max }}">{% endif %}
                         <select name="sort" onchange="this.form.submit()" class="text-xs font-bold border border-gray-200 rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-red-500 bg-white cursor-pointer">
@@ -145,10 +191,18 @@
                             <span class="text-[10px] text-gray-400 font-bold uppercase">COP</span>
                         </div>
 
-                        <button class="w-full bg-black text-white py-3 rounded-xl hover:bg-red-600 transition-colors uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2">
-                            <i class="fas fa-lock text-[9px] opacity-50"></i>
-                            <span>Finalizar Compra</span>
-                        </button>
+                        <div class="space-y-2">
+                            <button onclick="addToCart({{ moto.id_moto }}, '{{ moto.modelo }}')"
+                                    class="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2">
+                                <i class="fas fa-shopping-cart text-[9px]"></i>
+                                <span>Agregar al Carrito</span>
+                            </button>
+                            <button onclick="irACheckout()"
+                                    class="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2">
+                                <i class="fas fa-lock text-[9px] opacity-50"></i>
+                                <span>Finalizar Compra</span>
+                            </button>
+                        </div>
                         <p class="text-[9px] text-center text-gray-400 mt-2 italic">* Solo retiro en tienda local</p>
                     </div>
                 </div>
